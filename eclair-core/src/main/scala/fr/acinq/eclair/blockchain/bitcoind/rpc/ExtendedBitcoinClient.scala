@@ -97,6 +97,13 @@ class ExtendedBitcoinClient(val rpcClient: BitcoinJsonRPCClient) {
       JString(hex) = json \ "hex"
     } yield Transaction.read(hex)
 
+  def minScanHeight()(implicit ec: ExecutionContext): Future[Int] =
+    for {
+      json <- rpcClient.invoke("getblockchaininfo")
+      pruneHeight = (json \ "pruneheight").extractOpt[Int]
+      minHeight = pruneHeight.getOrElse(500000) // never need to scan beyond segwit activation
+    } yield minHeight
+
   /**
     * Assumes the transaction is indexed by a previous call to 'importaddress'
     */
