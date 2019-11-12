@@ -67,7 +67,8 @@ trait BitcoindService extends Logging {
 
   case class BitcoinReq(method: String, params: Any*)
 
-  def startBitcoind(txIndexEnabled: Boolean = false): Unit = {
+  def startBitcoind(txIndexEnabled: Boolean = false, prune: Int = 0): Unit = {
+    assert(!(txIndexEnabled && prune > 0), "TxIndex does not work in pruned mode")
     Files.createDirectories(PATH_BITCOIND_DATADIR.toPath)
     val bitcoinConfFile = new File(PATH_BITCOIND_DATADIR.toString, "bitcoin.conf").toPath
     if (!Files.exists(bitcoinConfFile)) {
@@ -78,6 +79,7 @@ trait BitcoindService extends Logging {
           .replace("28334", bitcoindZmqBlockPort.toString)
           .replace("28335", bitcoindZmqTxPort.toString)
           .replace("txindex=0", if (txIndexEnabled) "txindex=1" else "txindex=0")
+          .replace("prune=0", if (prune > 0) s"prune=$prune" else "prune=0")
       Files.writeString(bitcoinConfFile, conf)
     }
 
