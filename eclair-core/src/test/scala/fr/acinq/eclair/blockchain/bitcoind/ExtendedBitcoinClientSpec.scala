@@ -95,7 +95,7 @@ class ExtendedBitcoinClientSpec extends TestKit(ActorSystem("test")) with Bitcoi
     val (channelTransaction, channelShortId) = ExternalWalletHelper.nonWalletTransaction(system) // create a non wallet transaction
 
     // we won't be able to get the raw transaction if it's non-wallet
-    client.getRawTransaction(channelTransaction.txid.toHex).pipeTo(sender.ref)
+    client.getRawTransaction(channelTransaction.txid.toString()).pipeTo(sender.ref)
     sender.expectMsgType[Failure]
 
     // likewise we can't get the channel short id from the txId
