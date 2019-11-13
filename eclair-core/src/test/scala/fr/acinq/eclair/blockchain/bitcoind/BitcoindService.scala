@@ -138,6 +138,14 @@ trait BitcoindService extends Logging {
     assert(blocks.size == blockCount)
   }
 
+  def pruneBlockchain(bitcoinCli: ActorRef, height: Int, timeout: FiniteDuration = 10 seconds)(implicit system: ActorSystem): Unit = {
+    val sender = TestProbe()
+    sender.send(bitcoinCli, BitcoinReq("pruneblockchain", height))
+    val JInt(pruneHeight) = sender.expectMsgType[JValue](timeout)
+    // we can not be sure prune height will be at a specific height
+    assert(pruneHeight > 0)
+  }
+
   object ExternalWalletHelper {
     // master key used to simulate non wallet transactions
     val nonWalletMasterKey = DeterministicWallet.generate(randomBytes32)
